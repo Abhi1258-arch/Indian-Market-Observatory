@@ -1,0 +1,2 @@
+severity,subject,issue
+INFO,ALL,"Month(s) with fewer than 2 valid signals (no trade possible / undefined selection): [Period('2023-08', 'M'), Period('2023-09', 'M')]"

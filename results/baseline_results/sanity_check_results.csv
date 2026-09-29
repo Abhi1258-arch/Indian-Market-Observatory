@@ -1,0 +1,11 @@
+check,passed,detail
+"Momentum starts at ₹100,000",True,"Implied starting value = 100,000.0000"
+"Mean Reversion starts at ₹100,000",True,"Implied starting value = 100,000.0000"
+"Nifty 50 starts at ₹100,000",True,"Implied starting value = 100,000.0000"
+Momentum: exactly 2 stocks selected in every active month,True,OK
+Mean Reversion: exactly 2 stocks selected in every active month,True,OK
+Portfolio weights sum to 100%,True,0.5 x 2 = 1.0
+No look-ahead: each month's signal equals the PRIOR month's realized return,True,Mismatches found: 0
+Momentum: portfolio value compounds correctly,True,Recomputed cumulative product matches stored PortfolioValue
+Mean Reversion: portfolio value compounds correctly,True,Recomputed cumulative product matches stored PortfolioValue
+Nifty 50: portfolio value compounds correctly,True,Recomputed cumulative product matches stored PortfolioValue

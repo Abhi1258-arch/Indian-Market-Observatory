@@ -1,0 +1,20 @@
+MANUAL VERIFICATION - Momentum strategy, holding month 2023-10
+Signal month (prior month whose returns determine selection): 2023-09
+
+Step 1 - Signal-month returns for all 5 stocks (this is the momentum score):
+  TCS        SignalReturn (return in 2023-09) = +5.1180%   -> MomentumRank = 1
+  INFY       SignalReturn (return in 2023-09) = +0.0000%   -> MomentumRank = 2
+  ICICIBANK  SignalReturn (return in 2023-09) = -0.7145%   -> MomentumRank = 3
+  RELIANCE   SignalReturn (return in 2023-09) = -2.5758%   -> MomentumRank = 4
+  HDFCBANK   SignalReturn (return in 2023-09) = -2.8731%   -> MomentumRank = 5
+
+Step 2 - Select top 2 by MomentumRank: TCS and INFY
+
+Step 3 - Realized return of each selected stock DURING the holding month 2023-10 (this is what actually gets earned, and was NOT known at selection time):
+  TCS: RealizedReturn(2023-10) = -4.2831%
+  INFY: RealizedReturn(2023-10) = -3.4371%
+
+Step 4 - Portfolio return = 0.5 x -4.2831% + 0.5 x -3.4371% = -3.8601%
+         (Engine computed: -3.8601% -- should match to rounding)
+
+Step 5 - Portfolio value: V(t) = V(t-1) x (1 + R_p) = ₹100,000.00 x (1 + -3.8601%) = ₹96,139.90
