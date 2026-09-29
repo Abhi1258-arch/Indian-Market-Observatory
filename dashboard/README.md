@@ -5,7 +5,7 @@ top of the results in this repository. It does not perform any of its own
 calculations — every number it displays is copied from the locked,
 validated results in `results/` and `paper/`.
 
-**Live dashboard:** https://claude.ai/artifact/GCzvoNWEzFzXXFLu9cE1Tt
+**Live dashboard:** https://abh1258-arch.github.io/Indian-Market-Observatory/
 
 The dashboard includes:
 
