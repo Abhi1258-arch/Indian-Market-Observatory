@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Indian Market Observatory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#F3F4EF; --panel:#FFFFFF; --ink:#171A17; --sub:#5B5F58; --line:#D9DAD3;
+  --accent:#1F3A3D; --pos:#2F6B4F; --neg:#9C3B2E; --mom:#1F3A3D; --mr:#B8863E; --nifty:#5B5F58;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#12140F;--panel:#1A1D17;--ink:#EDEFE9;--sub:#9A9D93;--line:#2E312A;--nifty:#9A9D93;}
+}
+:root[data-theme="dark"]{--bg:#12140F;--panel:#1A1D17;--ink:#EDEFE9;--sub:#9A9D93;--line:#2E312A;--nifty:#9A9D93;}
+*{box-sizing:border-box;}
+html{scroll-padding-top:64px;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;}
+.serif{font-family:'Source Serif 4',Georgia,serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+nav{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+nav .row{display:flex;gap:18px;overflow-x:auto;padding:14px 24px;max-width:1080px;margin:0 auto;}
+nav a{color:var(--sub);text-decoration:none;font-size:13px;white-space:nowrap;}
+nav a:hover,nav a:focus-visible{color:var(--ink);}
+header.hero{padding:56px 0 40px;border-bottom:1px solid var(--line);}
+h1.title{font-size:clamp(30px,5vw,46px);margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+p.subtitle{color:var(--sub);font-size:17px;margin:0 0 28px;max-width:60ch;}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px 24px;border-top:1px solid var(--line);padding-top:20px;}
+.meta div span.k{display:block;color:var(--sub);font-size:12px;margin-bottom:3px;}
+.meta div span.v{font-family:'IBM Plex Mono',monospace;font-size:14px;}
+section{padding:48px 0;border-bottom:1px solid var(--line);}
+h2{font-size:24px;font-weight:600;margin:0 0 6px;}
+p.lede{color:var(--sub);max-width:68ch;margin:0 0 28px;font-size:15px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:24px;}
+.card{background:var(--panel);padding:22px;}
+.card .label{font-size:13px;color:var(--sub);margin-bottom:10px;display:flex;align-items:center;}
+.card .value{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;}
+.card .delta{font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:6px;}
+.pos{color:var(--pos);} .neg{color:var(--neg);}
+.chart-box{background:var(--panel);border:1px solid var(--line);padding:20px;margin-bottom:8px;}
+.chart-box canvas{max-width:100%;}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--panel);}
+th,td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:right;}
+th:first-child,td:first-child{text-align:left;}
+thead th{color:var(--sub);font-weight:500;font-size:12px;border-bottom:1px solid var(--ink);}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:22px;}
+.flow .step{border:1px solid var(--line);background:var(--panel);padding:10px 14px;font-size:13px;}
+.flow .arrow{color:var(--sub);}
+.eq{font-family:'IBM Plex Mono',monospace;background:var(--panel);border:1px solid var(--line);padding:14px 16px;margin:0 0 8px;font-size:14px;}
+.eq-note{color:var(--sub);font-size:13px;margin:0 0 20px;}
+ul.plain{padding-left:18px;margin:0;} ul.plain li{margin-bottom:8px;font-size:14.5px;}
+.note{border-left:2px solid var(--line);padding:4px 0 4px 14px;color:var(--sub);font-size:13.5px;margin:16px 0;}
+select,input{font-family:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);}
+select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#explorerTable thead th{position:sticky;top:0;background:var(--panel);z-index:1;}
+.controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.legend-row{display:flex;gap:18px;font-size:12px;color:var(--sub);margin-top:10px;flex-wrap:wrap;}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media (max-width:720px){.grid2{grid-template-columns:1fr;}}
+footer{padding:32px 0 60px;color:var(--sub);font-size:12.5px;}
+</style>
+</head>
+<body>
+<nav><div class="row">
+<a href="#overview">Overview</a><a href="#performance">Performance</a><a href="#metrics">Metrics</a>
+<a href="#methodology">Methodology</a><a href="#explorer">Selections</a><a href="#risk">Risk</a>
+<a href="#robustness">Robustness</a><a href="#behavioral">Behavioral</a><a href="#interpretation">Interpretation</a>
+<a href="#limitations">Limitations</a><a href="#reproducibility">Reproducibility</a>
+</div></nav>
+
+<header class="hero wrap" id="overview">
+<h1 class="title serif">Indian Market Observatory</h1>
+<p class="subtitle">Quantitative Investing Through Behavioral Finance — an educational quantitative research backtest, not investment advice and not a prediction of future performance.</p>
+<p class="lede" style="max-width:70ch">Research question: can simple systematic strategies based on momentum and mean reversion outperform passive investing in Indian large-cap equities? This project tests whether patterns discussed in behavioral finance translate into simple, mechanical quantitative signals.</p>
+<div class="meta">
+<div><span class="k">Study period</span><span class="v">Aug 2023 – Jun 2026</span></div>
+<div><span class="k">Universe</span><span class="v">RELIANCE · TCS · HDFCBANK · INFY · ICICIBANK</span></div>
+<div><span class="k">Initial capital</span><span class="v">₹100,000</span></div>
+<div><span class="k">Rebalancing</span><span class="v">Monthly, 2 of 5, 50/50</span></div>
+<div><span class="k">Benchmark</span><span class="v">Nifty 50 Price Index (^NSEI)</span></div>
+<div><span class="k">Transaction costs (baseline)</span><span class="v">0 bps</span></div>
+</div>
+</header>
+
+<section class="wrap" id="performance">
+<h2>Baseline Results</h2>
+<p class="lede">All three portfolios start at ₹100,000 on the same date. These are the locked baseline figures — zero transaction costs, zero slippage, 0% risk-free rate.</p>
+<div class="cards">
+<div class="card"><div class="label"><span class="dot" style="background:var(--mom)"></span>Momentum</div><div class="value">₹105,318.89</div><div class="delta pos">+5.32% total return</div></div>
+<div class="card"><div class="label"><span class="dot" style="background:var(--mr)"></span>Mean Reversion</div><div class="value">₹99,876.35</div><div class="delta neg">−0.12% total return</div></div>
+<div class="card"><div class="label"><span class="dot" style="background:var(--nifty)"></span>Nifty 50 Price Index</div><div class="value">₹123,953.45</div><div class="delta pos">+23.95% total return</div></div>
+</div>
+<div class="chart-box"><canvas id="mainChart" height="110" role="img" aria-label="Line chart of Momentum, Mean Reversion and Nifty 50 Price Index portfolio value from August 2023 to June 2026, all starting at ₹100,000"></canvas>
+<div class="legend-row">
+<span><span class="dot" style="background:var(--mom)"></span>Momentum</span>
+<span><span class="dot" style="background:var(--mr)"></span>Mean Reversion</span>
+<span><span class="dot" style="background:var(--nifty)"></span>Nifty 50 Price Index</span>
+</div></div>
+<p class="eq-note">Excludes dividends — Nifty 50 Price Index only, not Total Return Index.</p>
+
+<div style="margin-top:8px">
+<h3 style="font-size:16px;margin-bottom:12px">Key Findings</h3>
+<ul class="plain">
+<li>Nifty 50 Price Index finished at ₹123,953.45, compared with ₹105,318.89 for Momentum and ₹99,876.35 for Mean Reversion.</li>
+<li>Over this sample, the Nifty 50 Price Index accumulated more value than either tested active strategy.</li>
+<li>Momentum finished above its starting capital, while Mean Reversion finished approximately flat.</li>
+</ul>
+<p class="note">These findings describe this specific sample, universe, methodology, and cost assumption; they do not establish future performance or universal strategy effectiveness.</p>
+</div>
+</section>
+
+<section class="wrap" id="metrics">
+<h2>Performance Metrics</h2>
+<p class="lede">Full comparison across return, risk, and consistency measures.</p>
+<div class="tablewrap"><table id="metricsTable"><thead><tr><th>Metric</th><th>Momentum</th><th>Mean Reversion</th><th>Nifty 50 Price Index</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section class="wrap" id="methodology">
+<h2>Methodology</h2>
+<p class="lede">Both strategies use the identical previous-month-return signal; only the selection direction differs.</p>
+<div class="grid2">
+<div>
+<p style="font-size:13px;color:var(--sub);margin:0 0 8px">MOMENTUM</p>
+<div class="flow"><div class="step">Previous-month return</div><span class="arrow">→</span><div class="step">Rank 5 stocks</div><span class="arrow">→</span><div class="step">Select top 2</div><span class="arrow">→</span><div class="step">50/50 allocation</div><span class="arrow">→</span><div class="step">Hold, then rebalance</div></div>
+</div>
+<div>
+<p style="font-size:13px;color:var(--sub);margin:0 0 8px">MEAN REVERSION (simple return-based)</p>
+<div class="flow"><div class="step">Previous-month return</div><span class="arrow">→</span><div class="step">Rank 5 stocks</div><span class="arrow">→</span><div class="step">Select bottom 2</div><span class="arrow">→</span><div class="step">50/50 allocation</div><span class="arrow">→</span><div class="step">Hold, then rebalance</div></div>
+</div>
+</div>
+<p class="note">Mean reversion here ranks on raw prior-month return only — it is not a z-score, moving-average, or Bollinger-band model.</p>
+<div class="eq">Mᵢ,ₜ = (Pᵢ,ₜ₋₁ − Pᵢ,ₜ₋₂) / Pᵢ,ₜ₋₂</div><p class="eq-note">Signal: each stock's own return over the prior month.</p>
+<div class="eq">Rₚ,ₜ = 0.5·R₁,ₜ + 0.5·R₂,ₜ</div><p class="eq-note">Portfolio return: equal-weighted average of the two selected stocks' returns this month.</p>
+<div class="eq">Vₜ = Vₜ₋₁ · (1 + Rₚ,ₜ)</div><p class="eq-note">Portfolio value compounds month over month from ₹100,000.</p>
+<div class="eq">DDₜ = (Vₜ − RunningMaxₜ) / RunningMaxₜ</div><p class="eq-note">Drawdown: distance below the highest value reached so far.</p>
+</section>
+
+<section class="wrap" id="explorer">
+<h2>Monthly Selection Explorer</h2>
+<p class="lede">Every month's selected pair and realized return for both strategies. The first two months have no valid signal yet and are excluded from trading.</p>
+<div class="controls"><input id="search" placeholder="Filter by ticker, e.g. TCS" /></div>
+<div class="tablewrap" style="max-height:420px;overflow-y:auto"><table id="explorerTable"><thead><tr><th>Month</th><th>Mom S1</th><th>Mom S2</th><th>Mom Return</th><th>MR S1</th><th>MR S2</th><th>MR Return</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section class="wrap" id="risk">
+<h2>Risk Analysis</h2>
+<p class="lede">Higher return is not the only dimension of performance — drawdown and volatility show what it cost to get there.</p>
+<div class="chart-box"><canvas id="ddChart" height="100"></canvas></div>
+<div class="grid2" style="margin-top:20px">
+<div class="chart-box"><canvas id="volChart" height="140"></canvas></div>
+<div class="chart-box"><canvas id="sharpeChart" height="140"></canvas></div>
+</div>
+</section>
+
+<section class="wrap" id="robustness">
+<h2>Robustness &amp; Sensitivity</h2>
+<p class="lede">Supplementary checks on the same underlying returns — these do not replace the baseline above.</p>
+<h3 style="font-size:16px">Common Active Period Robustness Check</h3>
+<p class="eq-note">Rebased to ₹100,000 at October 2023, when both active strategies first hold a position.</p>
+<div class="tablewrap"><table><thead><tr><th>Metric</th><th>Momentum</th><th>Mean Reversion</th><th>Nifty 50 Price Index</th></tr></thead><tbody>
+<tr><td>Final Value</td><td>₹109,547.54</td><td>₹102,805.15</td><td>₹125,085.17</td></tr>
+<tr><td>Total Return</td><td>+9.55%</td><td>+2.81%</td><td>+25.09%</td></tr>
+<tr><td>CAGR</td><td>+3.48%</td><td>+1.04%</td><td>+8.76%</td></tr>
+<tr><td>Volatility</td><td>18.86%</td><td>13.79%</td><td>14.19%</td></tr>
+<tr><td>Sharpe</td><td>0.273</td><td>0.142</td><td>0.663</td></tr>
+<tr><td>Max Drawdown</td><td>−22.06%</td><td>−19.78%</td><td>−14.78%</td></tr>
+</tbody></table></div>
+<h3 style="font-size:16px;margin-top:28px">Transaction Cost Sensitivity</h3>
+<p class="eq-note">Round-trip cost applied only to the active strategies on rebalance months. No cost assumption here is asserted as "realistic" — these are illustrative stress points.</p>
+<div class="chart-box"><canvas id="costChart" height="110"></canvas></div>
+<h3 style="font-size:16px;margin-top:28px">Concentration</h3>
+<p class="lede" style="margin-bottom:6px">Both strategies hold 2 of 5 stocks each month — a concentrated construction. This concentration may contribute to the higher volatility and drawdowns observed in the active strategies relative to the more diversified benchmark; causality was not experimentally isolated.</p>
+<h3 style="font-size:16px;margin-top:20px">Benchmark Limitation</h3>
+<p class="lede" style="margin-bottom:0">The Nifty 50 Price Index excludes dividends. A Nifty 50 Total Return Index comparison would be a natural future extension, not something substituted here.</p>
+</section>
+
+<section class="wrap" id="behavioral">
+<h2>Behavioral Finance Framework</h2>
+<p class="lede">These are theoretical interpretations, not causal findings established by this backtest. The results do not establish that investor psychology caused the observed returns.</p>
+<div class="grid2">
+<div><p style="font-weight:600;font-size:14px;margin-bottom:8px">Momentum — possible behavioral explanations</p>
+<ul class="plain"><li>One possible explanation is investor underreaction to new information.</li><li>Gradual diffusion of information across the market.</li><li>Herding behavior among investors.</li><li>Confirmation bias reinforcing an existing trend.</li></ul></div>
+<div><p style="font-weight:600;font-size:14px;margin-bottom:8px">Mean Reversion — possible behavioral explanations</p>
+<ul class="plain"><li>The strategy is conceptually consistent with investor overreaction.</li><li>Loss aversion driving panic selling.</li><li>Anchoring to recent price levels.</li><li>Temporary mispricing that partially corrects.</li></ul></div>
+</div>
+</section>
+
+<section class="wrap" id="interpretation">
+<h2>What Do the Results Suggest?</h2>
+<p class="lede" style="margin-bottom:14px">This is not an investment recommendation. Over this particular sample, the Nifty 50 Price Index accumulated more value than either active strategy. Momentum finished above its starting capital; Mean Reversion finished approximately flat. The results therefore do not demonstrate that these simple behavioral strategies outperformed passive investing during the sample. This does not establish that momentum or mean reversion never work — only that they did not in this specific window, universe, and cost assumption.</p>
+</section>
+
+<section class="wrap" id="limitations">
+<h2>Limitations</h2>
+<ul class="plain">
+<li>Small sample — only five stocks.</li>
+<li>Short time period — approximately three years.</li>
+<li>Concentration — only two stocks held at a time.</li>
+<li>Baseline assumes zero transaction costs.</li>
+<li>Baseline assumes zero slippage.</li>
+<li>Benchmark excludes dividends (price index, not TRI).</li>
+<li>No direct investor-level psychological data was measured.</li>
+<li>Historical performance does not establish future performance.</li>
+<li>No out-of-sample validation on a separate unseen period.</li>
+<li>Only one-month return ranking was tested — parameter simplicity.</li>
+</ul>
+<h3 style="font-size:16px;margin-top:26px">Future Research</h3>
+<p class="lede" style="margin-bottom:0">Broader universes (Nifty 100/500); longer lookback windows; alternative mean-reversion definitions; volatility filters; sector-neutral construction; modeled transaction costs; a dividend-adjusted (TRI) benchmark; out-of-sample and walk-forward testing; regime analysis; factor models; machine-learning ranking; and direct behavioral/sentiment data. All labeled as future work, not results of this project.</p>
+</section>
+
+<section class="wrap" id="reproducibility">
+<h2>Reproducibility &amp; Data Integrity</h2>
+<div class="grid2">
+<div><ul class="plain">
+<li>Data source: Yahoo Finance via <span class="mono">yfinance</span></li>
+<li>Tickers: RELIANCE.NS, TCS.NS, HDFCBANK.NS, INFY.NS, ICICIBANK.NS</li>
+<li>Benchmark: ^NSEI, monthly, Aug 2023 – Jun 2026</li>
+<li>Selection: top 2 / bottom 2 by previous-month return, 50/50, monthly</li>
+<li>Baseline: 0 bps costs, 0% risk-free rate</li>
+</ul></div>
+<div><ul class="plain">
+<li>Validated: no missing values, no duplicate dates, complete monthly coverage, chronological order.</li>
+<li>Zero look-ahead mismatches: each month's signal independently re-derived as equal to the prior month's realized return.</li>
+<li>Exactly two securities selected every active month; weights summed to 100%.</li>
+<li>No missing return was silently treated as zero.</li>
+<li>Benchmark file: 35 monthly observations, no missing values or duplicate dates.</li>
+</ul></div>
+</div>
+</section>
+
+<footer class="wrap">Indian Market Observatory — educational research project. Not financial advice. Past performance does not indicate future results.</footer>
+
+<script>
+const months = ["2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06"];
+const mom = [100000,100000,96140,100701,108597,101463,103075,101206,106372,106147,117453,126381,131360,124944,126020,128594,126710,124055,111379,121130,130833,132435,134092,129887,122994,119389,127024,132141,134605,135136,122291,112426,112969,106655,105319];
+const mr = [100000,100000,97151,99905,107579,113395,115250,111023,107355,106174,113266,121117,122284,124500,117001,119709,115305,118973,117839,115831,110782,114060,116849,111286,111060,109047,112354,115326,115650,112557,109983,102082,107317,106071,99876];
+const nifty = [100000,101997,99095,104567,112868,112838,114174,115961,117405,117019,124706,129591,131070,134056,125717,125332,122806,122097,114911,122154,126386,128550,132530,128641,126868,127825,133595,136092,135711,131510,130772,115984,124638,122302,123953];
+const cA='#1F3A3D',cB='#B8863E',cC='#5B5F58',gridC='rgba(120,120,120,.15)';
+const chartsReady = typeof Chart !== 'undefined';
+if(chartsReady){ Chart.defaults.font.family="'IBM Plex Mono',monospace"; Chart.defaults.font.size=11; Chart.defaults.color=cC; }
+function fmt(v){return '₹'+Math.round(v).toLocaleString('en-IN');}
+function safeChart(id, factory){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(!chartsReady){
+    el.replaceWith(Object.assign(document.createElement('div'), {className:'chart-fallback', style:'padding:24px 0;color:var(--sub);font-size:13px', textContent:'Chart library failed to load — data unavailable for this view.'}));
+    return;
+  }
+  try{ factory(el); }
+  catch(err){
+    console.error('Chart render failed for #'+id, err);
+    el.replaceWith(Object.assign(document.createElement('div'), {className:'chart-fallback', style:'padding:24px 0;color:var(--sub);font-size:13px', textContent:'This chart failed to render ('+err.message+').'}));
+  }
+}
+
+safeChart('mainChart', el => new Chart(el,{type:'line',data:{labels:months,datasets:[
+{label:'Momentum',data:mom,borderColor:cA,backgroundColor:cA,borderWidth:2,pointRadius:0,tension:0.15},
+{label:'Mean Reversion',data:mr,borderColor:cB,backgroundColor:cB,borderWidth:2,pointRadius:0,tension:0.15},
+{label:'Nifty 50 Price Index',data:nifty,borderColor:cC,backgroundColor:cC,borderWidth:2,pointRadius:0,tension:0.15}
+]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>'₹'+Math.round(v/1000)+'k'},grid:{color:gridC}},x:{grid:{display:false},ticks:{maxTicksLimit:10}}}}}));
+
+function drawdown(arr){let peak=arr[0],out=[];for(const v of arr){peak=Math.max(peak,v);out.push((v-peak)/peak*100);}return out;}
+
+safeChart('ddChart', el => new Chart(el,{type:'line',data:{labels:months,datasets:[
+{label:'Momentum',data:drawdown(mom),borderColor:cA,pointRadius:0,borderWidth:1.5},
+{label:'Mean Reversion',data:drawdown(mr),borderColor:cB,pointRadius:0,borderWidth:1.5},
+{label:'Nifty 50 Price Index',data:drawdown(nifty),borderColor:cC,pointRadius:0,borderWidth:1.5}
+]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:gridC}},x:{grid:{display:false},ticks:{maxTicksLimit:8}}}}}));
+
+safeChart('volChart', el => new Chart(el,{type:'bar',data:{labels:['Momentum','Mean Reversion','Nifty 50 Price Index'],datasets:[{data:[18.75,13.70,13.94],backgroundColor:[cA,cB,cC]}]},options:{plugins:{legend:{display:false},title:{display:true,text:'Annualized Volatility (%)',color:'#888'},tooltip:{callbacks:{label:c=>c.parsed.y+'%'}}},scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:gridC}},x:{grid:{display:false},ticks:{autoSkip:false}}}}}));
+
+safeChart('sharpeChart', el => new Chart(el,{type:'bar',data:{labels:['Momentum','Mean Reversion','Nifty 50 Price Index'],datasets:[{data:[0.192,0.063,0.614],backgroundColor:[cA,cB,cC]}]},options:{plugins:{legend:{display:false},title:{display:true,text:'Sharpe Ratio (rf = 0%)',color:'#888'}},scales:{y:{grid:{color:gridC}},x:{grid:{display:false},ticks:{autoSkip:false}}}}}));
+
+const bps=[0,10,25,50], momCost=[105318.89,103279.62,100291.61,95495.09], mrCost=[99876.35,97979.77,95199.47,90732.84];
+safeChart('costChart', el => new Chart(el,{type:'line',data:{labels:bps.map(b=>b+' bps'),datasets:[
+{label:'Momentum',data:momCost,borderColor:cA,backgroundColor:cA,pointRadius:4,borderWidth:2},
+{label:'Mean Reversion',data:mrCost,borderColor:cB,backgroundColor:cB,pointRadius:4,borderWidth:2}
+]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:8}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>'₹'+(v/1000)+'k'},grid:{color:gridC}},x:{grid:{display:false}}}}}));
+
+const metrics=[
+['Final Value','₹105,318.89','₹99,876.35','₹123,953.45'],
+['Total Return','+5.32%','−0.12%','+23.95%'],
+['CAGR','+1.85%','−0.04%','+7.87%'],
+['Annualized Volatility','18.75%','13.70%','13.94%'],
+['Sharpe Ratio','0.192','0.063','0.614'],
+['Maximum Drawdown','−22.06%','−19.78%','−14.78%'],
+['Best Month','+10.65% (Jun 2024)','+7.68% (Dec 2023)','+7.94% (Jun 2024)'],
+['Worst Month','−10.22% (Feb 2025)','−7.18% (Mar 2026)','−11.31% (Mar 2026)'],
+['Positive Months','18','16','19'],
+['Negative Months','15','17','15'],
+['Win Rate','54.5%','48.5%','55.9%']
+];
+document.querySelector('#metricsTable tbody').innerHTML = metrics.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td></tr>').join('');
+
+const sel=[
+["2023-08",null,null,null,null,null,null],
+["2023-09",null,null,null,null,null,null],
+["2023-10","TCS","INFY",-3.86,"HDFCBANK","RELIANCE",-2.85],["2023-11","RELIANCE","HDFCBANK",4.74,"TCS","ICICIBANK",2.83],
+["2023-12","INFY","HDFCBANK",7.84,"ICICIBANK","TCS",7.68],["2024-01","HDFCBANK","TCS",-6.57,"INFY","ICICIBANK",5.41],
+["2024-02","RELIANCE","INFY",1.59,"HDFCBANK","TCS",1.64],["2024-03","TCS","RELIANCE",-1.81,"HDFCBANK","INFY",-3.67],
+["2024-04","ICICIBANK","HDFCBANK",5.10,"INFY","TCS",-3.30],["2024-05","ICICIBANK","HDFCBANK",-0.21,"INFY","TCS",-1.10],
+["2024-06","HDFCBANK","INFY",10.65,"TCS","ICICIBANK",6.68],["2024-07","INFY","HDFCBANK",7.60,"TCS","ICICIBANK",6.93],
+["2024-08","INFY","TCS",3.94,"HDFCBANK","RELIANCE",0.96],["2024-09","INFY","TCS",-4.88,"RELIANCE","HDFCBANK",1.81],
+["2024-10","HDFCBANK","ICICIBANK",0.86,"TCS","INFY",-6.02],["2024-11","ICICIBANK","HDFCBANK",2.04,"RELIANCE","TCS",2.31],
+["2024-12","TCS","INFY",-1.47,"RELIANCE","ICICIBANK",-3.68],["2025-01","INFY","HDFCBANK",-2.10,"RELIANCE","TCS",3.18],
+["2025-02","RELIANCE","TCS",-10.22,"HDFCBANK","ICICIBANK",-0.95],["2025-03","HDFCBANK","ICICIBANK",8.75,"TCS","INFY",-1.70],
+["2025-04","ICICIBANK","RELIANCE",8.01,"INFY","TCS",-4.36],["2025-05","RELIANCE","ICICIBANK",1.22,"INFY","TCS",2.96],
+["2025-06","INFY","ICICIBANK",1.25,"TCS","HDFCBANK",2.45],["2025-07","RELIANCE","HDFCBANK",-3.14,"ICICIBANK","TCS",-4.76],
+["2025-08","ICICIBANK","HDFCBANK",-5.31,"TCS","RELIANCE",-0.20],["2025-09","TCS","RELIANCE",-2.93,"HDFCBANK","ICICIBANK",-1.81],
+["2025-10","RELIANCE","HDFCBANK",6.40,"TCS","ICICIBANK",3.03],["2025-11","RELIANCE","TCS",4.03,"ICICIBANK","HDFCBANK",2.64],
+["2025-12","RELIANCE","INFY",1.86,"HDFCBANK","TCS",0.28],["2026-01","INFY","TCS",0.39,"ICICIBANK","HDFCBANK",-2.67],
+["2026-02","INFY","ICICIBANK",-9.51,"RELIANCE","HDFCBANK",-2.29],["2026-03","ICICIBANK","RELIANCE",-8.07,"INFY","TCS",-7.18],
+["2026-04","RELIANCE","INFY",0.48,"HDFCBANK","ICICIBANK",5.13],["2026-05","RELIANCE","HDFCBANK",-5.59,"INFY","ICICIBANK",-1.16],
+["2026-06","ICICIBANK","INFY",-1.25,"RELIANCE","TCS",-5.84]
+];
+function pct(v){if(v===null||v===undefined)return '—';const s=v>=0?'+':'';return '<span class="'+(v>=0?'pos':'neg')+'">'+s+v.toFixed(2)+'%</span>';}
+function renderExplorer(filter){
+  const f=(filter||'').toUpperCase();
+  const rows=sel.filter(r=>{
+    if(r[1]===null) return !f; // hide no-signal rows when actively filtering by ticker
+    return !f||r[1].includes(f)||r[2].includes(f)||r[4].includes(f)||r[5].includes(f);
+  });
+  document.querySelector('#explorerTable tbody').innerHTML=rows.map(r=>{
+    if(r[1]===null){
+      return '<tr><td>'+r[0]+'</td><td colspan="6" style="text-align:left;color:var(--sub);font-style:italic">No valid signal yet — excluded from trading</td></tr>';
+    }
+    return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+pct(r[3])+'</td><td>'+r[4]+'</td><td>'+r[5]+'</td><td>'+pct(r[6])+'</td></tr>';
+  }).join('');
+}
+renderExplorer('');
+const searchEl = document.getElementById('search');
+if(searchEl) searchEl.addEventListener('input', e => renderExplorer(e.target.value));
+</script>
+</body>
+</html>
