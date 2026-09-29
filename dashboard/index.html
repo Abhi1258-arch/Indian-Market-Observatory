@@ -66,6 +66,44 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 @media (max-width:720px){.grid2{grid-template-columns:1fr;}}
 footer{padding:32px 0 60px;color:var(--sub);font-size:12.5px;}
+html{-webkit-text-size-adjust:100%;}
+header.hero{padding-left:24px;padding-right:24px;}
+section.wrap{padding-top:48px;padding-bottom:48px;}
+nav .row{scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+nav .row::-webkit-scrollbar{display:none;}
+.tablewrap{-webkit-overflow-scrolling:touch;}
+.tablewrap table{min-width:520px;}
+th,td{white-space:nowrap;}
+@media (max-width:720px){
+  .wrap{padding:0 16px;}
+  nav .row{padding:6px 16px;gap:6px;}
+  nav a{font-size:13.5px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);}
+  header.hero{padding:32px 16px 28px;}
+  section.wrap{padding-top:34px;padding-bottom:34px;}
+  p.subtitle{font-size:15.5px;margin-bottom:20px;}
+  .meta{grid-template-columns:1fr 1fr;gap:14px 16px;}
+  .meta div span.v{font-size:13px;overflow-wrap:anywhere;}
+  section{padding:34px 0;}
+  h2{font-size:21px;}
+  p.lede{font-size:14.5px;margin-bottom:20px;}
+  .cards{grid-template-columns:1fr;}
+  .card{padding:16px 18px;}
+  .card .value{font-size:24px;}
+  .chart-box{padding:12px;}
+  table{font-size:13px;}
+  th,td{padding:8px 10px;}
+  .flow{flex-direction:column;align-items:stretch;gap:4px;}
+  .flow .step{text-align:center;}
+  .flow .arrow{text-align:center;transform:rotate(90deg);line-height:1;}
+  .eq{font-size:13px;padding:12px;overflow-x:auto;white-space:nowrap;}
+  .controls input{width:100%;font-size:16px;padding:10px 12px;}
+  .legend-row{gap:12px;}
+  footer{padding:24px 0 48px;}
+}
+@media (max-width:380px){
+  .meta{grid-template-columns:1fr;}
+  h1.title{font-size:28px;}
+}
 </style>
 </head>
 <body>
@@ -245,7 +283,7 @@ const mr = [100000,100000,97151,99905,107579,113395,115250,111023,107355,106174,
 const nifty = [100000,101997,99095,104567,112868,112838,114174,115961,117405,117019,124706,129591,131070,134056,125717,125332,122806,122097,114911,122154,126386,128550,132530,128641,126868,127825,133595,136092,135711,131510,130772,115984,124638,122302,123953];
 const cA='#1F3A3D',cB='#B8863E',cC='#5B5F58',gridC='rgba(120,120,120,.15)';
 const chartsReady = typeof Chart !== 'undefined';
-if(chartsReady){ Chart.defaults.font.family="'IBM Plex Mono',monospace"; Chart.defaults.font.size=11; Chart.defaults.color=cC; }
+if(chartsReady){ Chart.defaults.font.family="'IBM Plex Mono',monospace"; Chart.defaults.font.size=11; Chart.defaults.color=cC; if(window.matchMedia('(max-width:720px)').matches){ Chart.defaults.aspectRatio=1.25; Chart.defaults.font.size=10; } }
 function fmt(v){return '₹'+Math.round(v).toLocaleString('en-IN');}
 function safeChart(id, factory){
   const el = document.getElementById(id);
