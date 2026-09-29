@@ -10,14 +10,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#F3F4EF; --panel:#FFFFFF; --ink:#171A17; --sub:#5B5F58; --line:#D9DAD3;
-  --accent:#1F3A3D; --pos:#2F6B4F; --neg:#9C3B2E; --mom:#1F3A3D; --mr:#B8863E; --nifty:#5B5F58;
+  --bg:#F7F4EC; --panel:#FFFEFB; --ink:#141A26; --sub:#5E6472; --line:#E2DCCB; --gold:#A8842F;
+  --accent:#14213D; --pos:#1E6B52; --neg:#9E3A38; --mom:#14213D; --mr:#B08D3C; --nifty:#7A7F8C;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){--bg:#12140F;--panel:#1A1D17;--ink:#EDEFE9;--sub:#9A9D93;--line:#2E312A;--nifty:#9A9D93;}
+  :root:not([data-theme="light"]){--bg:#0B0F17;--panel:#121826;--ink:#EEEADF;--sub:#9AA3B5;--line:#232C3F;--gold:#D4AF63;--accent:#D4AF63;--pos:#4FB58C;--neg:#E27C74;--mom:#7FA8DC;--mr:#D4AF63;--nifty:#9AA3B5;}
 }
-:root[data-theme="dark"]{--bg:#12140F;--panel:#1A1D17;--ink:#EDEFE9;--sub:#9A9D93;--line:#2E312A;--nifty:#9A9D93;}
+:root[data-theme="dark"]{--bg:#0B0F17;--panel:#121826;--ink:#EEEADF;--sub:#9AA3B5;--line:#232C3F;--gold:#D4AF63;--accent:#D4AF63;--pos:#4FB58C;--neg:#E27C74;--mom:#7FA8DC;--mr:#D4AF63;--nifty:#9AA3B5;}
 *{box-sizing:border-box;}
 html{scroll-padding-top:64px;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;}
@@ -68,6 +68,16 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 footer{padding:32px 0 60px;color:var(--sub);font-size:12.5px;}
 html{-webkit-text-size-adjust:100%;}
 header.hero{padding-left:24px;padding-right:24px;}
+h1.title,h2{font-family:'Source Serif 4',Georgia,serif;}
+h1.title::after{content:"";display:block;width:56px;height:2px;background:var(--gold);margin-top:14px;}
+h2{letter-spacing:-0.005em;}
+.card{box-shadow:0 1px 0 rgba(20,26,38,.03);border-top:3px solid var(--line);}
+.cards .card:nth-child(1){border-top-color:var(--mom);} .cards .card:nth-child(2){border-top-color:var(--mr);} .cards .card:nth-child(3){border-top-color:var(--nifty);}
+.chart-box,.tablewrap{box-shadow:0 8px 24px -16px rgba(20,26,38,.28);}
+.meta div span.k{text-transform:uppercase;letter-spacing:.08em;font-size:11px;}
+nav a:hover{color:var(--gold);}
+thead th{text-transform:uppercase;letter-spacing:.06em;}
+.note{border-left-color:var(--gold);}
 section.wrap{padding-top:48px;padding-bottom:48px;}
 nav .row{scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 nav .row::-webkit-scrollbar{display:none;}
@@ -75,10 +85,10 @@ nav .row::-webkit-scrollbar{display:none;}
 .tablewrap table{min-width:520px;}
 th,td{white-space:nowrap;}
 @media (max-width:720px){
-  .wrap{padding:0 16px;}
-  nav .row{padding:6px 16px;gap:6px;}
+  .wrap{padding-left:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right));}
+  nav .row{padding:6px 22px;gap:6px;}
   nav a{font-size:13.5px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);}
-  header.hero{padding:32px 16px 28px;}
+  header.hero{padding:32px 22px 28px;}
   section.wrap{padding-top:34px;padding-bottom:34px;}
   p.subtitle{font-size:15.5px;margin-bottom:20px;}
   .meta{grid-template-columns:1fr 1fr;gap:14px 16px;}
@@ -281,7 +291,7 @@ const months = ["2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","202
 const mom = [100000,100000,96140,100701,108597,101463,103075,101206,106372,106147,117453,126381,131360,124944,126020,128594,126710,124055,111379,121130,130833,132435,134092,129887,122994,119389,127024,132141,134605,135136,122291,112426,112969,106655,105319];
 const mr = [100000,100000,97151,99905,107579,113395,115250,111023,107355,106174,113266,121117,122284,124500,117001,119709,115305,118973,117839,115831,110782,114060,116849,111286,111060,109047,112354,115326,115650,112557,109983,102082,107317,106071,99876];
 const nifty = [100000,101997,99095,104567,112868,112838,114174,115961,117405,117019,124706,129591,131070,134056,125717,125332,122806,122097,114911,122154,126386,128550,132530,128641,126868,127825,133595,136092,135711,131510,130772,115984,124638,122302,123953];
-const cA='#1F3A3D',cB='#B8863E',cC='#5B5F58',gridC='rgba(120,120,120,.15)';
+const _cs=getComputedStyle(document.documentElement),cA=_cs.getPropertyValue('--mom').trim(),cB=_cs.getPropertyValue('--mr').trim(),cC=_cs.getPropertyValue('--nifty').trim(),gridC='rgba(120,120,120,.15)';
 const chartsReady = typeof Chart !== 'undefined';
 if(chartsReady){ Chart.defaults.font.family="'IBM Plex Mono',monospace"; Chart.defaults.font.size=11; Chart.defaults.color=cC; if(window.matchMedia('(max-width:720px)').matches){ Chart.defaults.aspectRatio=1.25; Chart.defaults.font.size=10; } }
 function fmt(v){return '₹'+Math.round(v).toLocaleString('en-IN');}
@@ -302,16 +312,16 @@ function safeChart(id, factory){
 safeChart('mainChart', el => new Chart(el,{type:'line',data:{labels:months,datasets:[
 {label:'Momentum',data:mom,borderColor:cA,backgroundColor:cA,borderWidth:2,pointRadius:0,tension:0.15},
 {label:'Mean Reversion',data:mr,borderColor:cB,backgroundColor:cB,borderWidth:2,pointRadius:0,tension:0.15},
-{label:'Nifty 50 Price Index',data:nifty,borderColor:cC,backgroundColor:cC,borderWidth:2,pointRadius:0,tension:0.15}
-]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>'₹'+Math.round(v/1000)+'k'},grid:{color:gridC}},x:{grid:{display:false},ticks:{maxTicksLimit:10}}}}}));
+{label:'Nifty 50 Price Index',data:nifty,borderColor:cC,backgroundColor:cC,borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.15}
+]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>'₹'+Math.round(v/1000)+'k'},grid:{color:gridC}},x:{grid:{display:false},ticks:{maxTicksLimit:window.innerWidth<720?5:10,maxRotation:0,autoSkipPadding:12}}}}}));
 
 function drawdown(arr){let peak=arr[0],out=[];for(const v of arr){peak=Math.max(peak,v);out.push((v-peak)/peak*100);}return out;}
 
 safeChart('ddChart', el => new Chart(el,{type:'line',data:{labels:months,datasets:[
 {label:'Momentum',data:drawdown(mom),borderColor:cA,pointRadius:0,borderWidth:1.5},
 {label:'Mean Reversion',data:drawdown(mr),borderColor:cB,pointRadius:0,borderWidth:1.5},
-{label:'Nifty 50 Price Index',data:drawdown(nifty),borderColor:cC,pointRadius:0,borderWidth:1.5}
-]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:gridC}},x:{grid:{display:false},ticks:{maxTicksLimit:8}}}}}));
+{label:'Nifty 50 Price Index',data:drawdown(nifty),borderColor:cC,borderDash:[6,4],pointRadius:0,borderWidth:1.5}
+]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:gridC}},x:{grid:{display:false},ticks:{maxTicksLimit:window.innerWidth<720?5:8,maxRotation:0,autoSkipPadding:12}}}}}));
 
 safeChart('volChart', el => new Chart(el,{type:'bar',data:{labels:['Momentum','Mean Reversion','Nifty 50 Price Index'],datasets:[{data:[18.75,13.70,13.94],backgroundColor:[cA,cB,cC]}]},options:{plugins:{legend:{display:false},title:{display:true,text:'Annualized Volatility (%)',color:'#888'},tooltip:{callbacks:{label:c=>c.parsed.y+'%'}}},scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:gridC}},x:{grid:{display:false},ticks:{autoSkip:false}}}}}));
 
